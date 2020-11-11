@@ -6,29 +6,10 @@
       v-model="newTodo"
       @keyup.enter="addTodo"
     >
-    <div v-for="(todo, index) in todos" :key="todo.id" class="todo-item">
-      <div class="todo-item-left">
-        <input type="checkbox" v-model="todo.completed">
-        <div v-if="!todo.editing" 
-          @dblclick="editTodo(todo)"
-          class="todo-item-label"
-          :class="{ completed : todo.completed}"
-        >{{ todo.title }}</div>
-        <input 
-          v-else class="todo-item-edit" 
-          type="text" 
-          v-model="todo.title" 
-          @blur="doneEdit(todo)" 
-          @keyup.enter="doneEdit(todo)"
-          @keyup.esc="cancelEdit(todo)"
-          v-focus
-        >
-      </div>
-
-      <div class="remove-item" @click="removeTodo(index)">
-        &times;
-      </div>
-    </div>
+    <transition-group name="fade" enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
+      <todo-item v-for="(todo, index) in todosFiltered" :key="todo.id" :todo="todo" :index="index" @removedTodo="removeTodo">
+      </todo-item>
+    </transition-group>
 
     <div class="extra-container">
       <div><label><input type="checkbox" :checked="!anyRemaining"
@@ -53,8 +34,13 @@
 </template>
 
 <script>
+import TodoItem from './TodoItem'
+
 export default {
   name: 'todo-list',
+  components: {
+    TodoItem,
+  },
   data () {
     return {
       newTodo: '',
@@ -112,7 +98,6 @@ export default {
       if(this.newTodo.trim().length === 0 ){
         return
       }
-
 
       this.todos.push({
         id: this.idForTodo,
